@@ -1,0 +1,22 @@
+version: '3.5'
+
+services:
+  db:
+    image: mysql
+    environment:
+      restart: always
+      MYSQL_DATABASE: shop
+      MYSQL_USER: root
+      MYSQL_PASSWORD: 1
+      MYSQL_ROOT_PASSWORD: 1
+    ports:
+      - 3307:3306
+    volumes:
+      - ./mysql-data:/var/lib/mysql
+  redis:
+    image: 'redis:alpine'
+    command: redis-server --requirepass redis
+    ports:
+      - 6380:6379
+    volumes:
+      - ./redis-data:/var/lib/redis/data

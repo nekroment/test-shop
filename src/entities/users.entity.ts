@@ -21,9 +21,6 @@ export class Users {
   password_hash: string;
 
   @Column('varchar', { length: 255, default: null })
-  activation_hash: string;
-
-  @Column('varchar', { length: 255, default: null })
   reset_hash: string;
 
   @Column('mediumint', { width: 9, default: 0 })
@@ -40,4 +37,13 @@ export class Users {
 
   @Column('varchar', { length: 255, default: '' })
   registration_ip: string;
+
+  @Column('boolean', { default: false })
+  tfa_enabled: boolean;
+
+  @Column('varchar', { length: 48, default: '' })
+  tfa_key: string;
+
+  @Column('boolean', { default: false })
+  reauthorization: boolean;
 }

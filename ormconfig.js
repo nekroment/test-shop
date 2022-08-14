@@ -11,7 +11,7 @@ const config = {
   username: process.env.DB_USER,
   password: process.env.DB_PASS,
   database: process.env.DB_NAME,
-  synchronize: false,
+  synchronize: true,
   logging: false,
   entities: process.env.BUILD
     ? [__dirname + '/dist/src/entities/*.entity.js']

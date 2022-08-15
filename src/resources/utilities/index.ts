@@ -6,3 +6,4 @@ export * from './googleAuthenticator';
 export * from './ipFormat';
 export * from './validateToken';
 export * from './getJWTToken';
+export * from './verifyJWTToken';

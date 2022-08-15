@@ -19,6 +19,18 @@ export class UsersService {
     private usersRepository: Repository<Users>,
   ) {}
 
+  async checkUserReauthorization(id: number): Promise<void> {
+    const user = await this.usersRepository.findOne({
+      where: {
+        id,
+        reauthorization: true,
+      },
+    });
+    if (user) {
+      throw new CustomError(globalErrors.passwordEmailUpdate, errorCode.login);
+    }
+  }
+
   async checkUserExist(
     email: string,
     message = globalErrors.incorrectUser,

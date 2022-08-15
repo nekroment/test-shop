@@ -19,6 +19,17 @@ export class UsersService {
     private usersRepository: Repository<Users>,
   ) {}
 
+  async toggleTfa(id: number): Promise<void> {
+    await this.usersRepository
+      .createQueryBuilder('user')
+      .update()
+      .set({
+        tfa_enabled: () => '!tfa_enabled',
+      })
+      .where(`id = ${id}`)
+      .execute();
+  }
+
   async checkUserReauthorization(id: number): Promise<void> {
     const user = await this.usersRepository.findOne({
       where: {
@@ -29,6 +40,15 @@ export class UsersService {
     if (user) {
       throw new CustomError(globalErrors.passwordEmailUpdate, errorCode.login);
     }
+  }
+
+  async findUserById(id: number): Promise<Users> {
+    return await this.usersRepository.findOne({
+      where: {
+        id,
+        account_status: true,
+      },
+    });
   }
 
   async checkUserExist(

@@ -29,6 +29,12 @@ export class Users {
   @Column('bigint', { width: 20, default: 0 })
   last_failed_login: number;
 
+  @Column('bigint', { width: 64, default: 0 })
+  failed_tfa_attempts: number;
+
+  @Column('bigint', { width: 64, default: 0 })
+  last_failed_tfa_attempt: number;
+
   @Column({ type: 'datetime', default: () => 'CURRENT_TIMESTAMP' })
   last_logged_in: string;
 

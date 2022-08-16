@@ -1,7 +1,5 @@
-import { CanActivate, ExecutionContext, Injectable } from '@nestjs/common';
+import { Injectable, CanActivate, ExecutionContext } from '@nestjs/common';
 import { GqlExecutionContext } from '@nestjs/graphql';
-
-import { UsersService } from '../services/users.service';
 import { CustomError, errorCode, verifyJWTToken } from 'src/resources';
 
 const messages = {
@@ -10,19 +8,15 @@ const messages = {
 };
 
 @Injectable()
-export class AuthGuard implements CanActivate {
-  constructor(private usersService: UsersService) {}
-
+export class TfaGuard implements CanActivate {
   async canActivate(context: ExecutionContext): Promise<boolean> {
     const ctx = GqlExecutionContext.create(context);
     const { req, connection } = ctx.getContext();
-    const second_req = context['args'][1]['req'];
-    const headers = req
-      ? req['headers']
-      : connection
-      ? connection['headers']
-      : second_req['headers'];
-    const payload = verifyJWTToken(headers['access-token']);
+    const headers = req['headers'] || connection['context'];
+    const payload = verifyJWTToken(
+      headers['tfa-token'],
+      process.env.TFA_SECRET,
+    );
     if (!payload) {
       throw new CustomError(messages.incorrectToken, errorCode.login);
     }
@@ -30,8 +24,7 @@ export class AuthGuard implements CanActivate {
       throw new CustomError(messages.tokenExpired, errorCode.login);
     }
     const user_id = payload['_id'];
-    await this.usersService.checkUserReauthorization(user_id);
-    req ? (req['id'] = user_id) : (second_req['id'] = user_id);
+    req['id'] = user_id;
     return true;
   }
 }

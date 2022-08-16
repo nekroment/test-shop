@@ -19,6 +19,34 @@ export class UsersService {
     private usersRepository: Repository<Users>,
   ) {}
 
+  async confirmUserTfa(id: number) {
+    const last_logged = getFormatDate();
+    await this.usersRepository
+      .createQueryBuilder('user')
+      .update()
+      .set({
+        failed_tfa_attempts: 0,
+        last_logged_in: last_logged,
+        failed_logins: 0,
+        reauthorization: false,
+      })
+      .where(`id = ${id}`)
+      .execute();
+  }
+
+  async updateUserFailedTfa(id: number): Promise<UpdateResult> {
+    const last_failed_login = Date.now();
+    return await this.usersRepository
+      .createQueryBuilder('user')
+      .update()
+      .set({
+        failed_tfa_attempts: () => `failed_tfa_attempts + 1`,
+        last_failed_tfa_attempt: last_failed_login,
+      })
+      .where(`id = ${id}`)
+      .execute();
+  }
+
   async toggleTfa(id: number): Promise<void> {
     await this.usersRepository
       .createQueryBuilder('user')

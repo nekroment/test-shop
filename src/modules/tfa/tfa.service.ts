@@ -10,11 +10,23 @@ import {
 } from 'src/resources';
 import { UsersService } from 'src/services/users.service';
 import { User } from '../auth/resources';
-import { tfaErrors, tfaSuccesses } from './resources';
+import { QrCodeTfa, tfaErrors, tfaSuccesses } from './resources';
 
 @Injectable()
 export class TfaService {
   constructor(private usersService: UsersService) {}
+
+  async getTfaQRCode(id: number): Promise<QrCodeTfa> {
+    const user = await this.usersService.findUserById(id);
+    const qr_code_url = GoogleAuthenticator.getQRCodeGoogleUrl(
+      GoogleAuthenticator.tfaCode(user.first_name),
+      user.tfa_key,
+    );
+    await this.usersService.updateUserTfaSecret(id, user.tfa_key);
+    return {
+      qr: qr_code_url,
+    };
+  }
 
   async toggleUserTfa(id: number, key: string): Promise<MessageAnswer> {
     const user = await this.usersService.findUserById(id);

@@ -144,4 +144,13 @@ export class UsersService {
       .where(`id = ${id}`)
       .execute();
   }
+
+  async updateUserTfaSecret(
+    id: number,
+    tfa_key: string,
+  ): Promise<UpdateResult> {
+    return await this.usersRepository.update(id, {
+      tfa_key: tfa_key,
+    });
+  }
 }

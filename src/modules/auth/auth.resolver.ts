@@ -5,9 +5,11 @@ import { MessageAnswer } from 'src/resources';
 import { AuthService } from './auth.service';
 import { Registration, User } from './resources';
 import { UsersService } from 'src/services/users.service';
-import { UseGuards } from '@nestjs/common';
+import { UseGuards, UseInterceptors } from '@nestjs/common';
 import { AuthGuard } from 'src/guards';
+import { UserIpInterceptor } from 'src/interceptors';
 
+@UseInterceptors(UserIpInterceptor)
 @Resolver()
 export class AuthResolver {
   constructor(

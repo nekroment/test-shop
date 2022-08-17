@@ -3,6 +3,7 @@ export interface SaveUser {
   last_name: string;
   email: string;
   password: string;
+  phone_number: string;
   ip: string;
 }
 

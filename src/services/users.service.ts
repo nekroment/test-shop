@@ -98,7 +98,7 @@ export class UsersService {
   }
 
   async saveUser(data: SaveUser): Promise<void> {
-    const { first_name, last_name, email, password, ip } = data;
+    const { first_name, last_name, email, password, ip, phone_number } = data;
     const password_hash = getAccessToken(password);
     const registration_datetime = getFormatDate();
     const secret = GoogleAuthenticator.createSecret(
@@ -110,6 +110,7 @@ export class UsersService {
       email,
       password_hash,
       registration_datetime,
+      phone_number,
       registration_ip: ip,
       tfa_key: secret,
     });

@@ -14,6 +14,9 @@ export class Users {
   @Column('varchar', { length: 64 })
   email: string;
 
+  @Column('varchar', { length: 64 })
+  phone_number: string;
+
   @Column('boolean', { default: true })
   account_status: boolean;
 

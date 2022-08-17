@@ -10,4 +10,5 @@ export const errorCode = {
   server: 'SERVER_ERROR',
   login: 'LOGIN_ERROR',
   tfa: 'TFA_ERROR',
+  admin: 'ADMIN_ERROR',
 };

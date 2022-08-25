@@ -29,4 +29,12 @@ export class PhonesService {
     });
     await this.phonesRepository.save(phone);
   }
+
+  async findPhoneById(id: number): Promise<Phones> {
+    return await this.phonesRepository.findOne({
+      where: {
+        id,
+      },
+    });
+  }
 }

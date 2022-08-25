@@ -1,4 +1,3 @@
-import { registerEnumType } from '@nestjs/graphql';
 import { OS } from 'src/resources';
 import {
   Column,

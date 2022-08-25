@@ -13,12 +13,18 @@ export class PhonesService {
   ) {}
 
   async adminAddPhone(data: Phone): Promise<void> {
-    const { name, price, brand } = data;
+    const { name, price, brand, diagonal, memory, ram, images } = data;
     const phone = this.phonesRepository.create({
       name,
       price,
       brand: {
         id: brand,
+      },
+      diagonal,
+      memory,
+      ram,
+      image: {
+        images,
       },
     });
     await this.phonesRepository.save(phone);

@@ -1,8 +1,9 @@
 import { InjectRepository } from '@nestjs/typeorm';
 import { Injectable } from '@nestjs/common';
-import { Repository } from 'typeorm';
+import { Repository, SelectQueryBuilder } from 'typeorm';
 
-import { Brands } from 'src/entities';
+import { GroupByBrands } from './../resources/interfaces/brands';
+import { Brands, Phones } from 'src/entities';
 
 @Injectable()
 export class BrandsService {
@@ -24,5 +25,19 @@ export class BrandsService {
         id,
       },
     });
+  }
+
+  async groupByBrands(): Promise<GroupByBrands[]> {
+    return await this.brandsRepository
+      .createQueryBuilder('brand')
+      .leftJoinAndSelect(
+        (qb: SelectQueryBuilder<any>) =>
+          qb.select(['id AS phone_id', 'brand_id']).from(Phones, 'ph'),
+        'phone',
+        'phone.brand_id = brand.id',
+      )
+      .select(['id', 'name', 'COUNT(phone.phone_id) AS phones'])
+      .groupBy('id')
+      .execute();
   }
 }

@@ -3,7 +3,16 @@ import { Injectable } from '@nestjs/common';
 import { Repository } from 'typeorm';
 
 import { Phones } from 'src/entities';
-import { Phone } from 'src/resources';
+import {
+  GroupByMemory,
+  GroupByRam,
+  GroupByBattery,
+  GroupByCamera,
+  GroupByDiagonal,
+  GroupByOs,
+  PriceRange,
+  Phone,
+} from 'src/resources';
 
 @Injectable()
 export class PhonesService {
@@ -36,5 +45,54 @@ export class PhonesService {
         id,
       },
     });
+  }
+
+  async groupByMemory(): Promise<
+    [
+      GroupByMemory[],
+      GroupByRam[],
+      GroupByDiagonal[],
+      GroupByBattery[],
+      GroupByCamera[],
+      GroupByOs[],
+      PriceRange[],
+    ]
+  > {
+    return await Promise.all([
+      this.phonesRepository
+        .createQueryBuilder('phone')
+        .select(['COUNT(id) AS phones', 'memory'])
+        .groupBy('memory')
+        .execute(),
+      this.phonesRepository
+        .createQueryBuilder('phone')
+        .select(['COUNT(id) AS phones', 'ram'])
+        .groupBy('ram')
+        .execute(),
+      this.phonesRepository
+        .createQueryBuilder('phone')
+        .select(['COUNT(id) AS phones', 'diagonal'])
+        .groupBy('diagonal')
+        .execute(),
+      this.phonesRepository
+        .createQueryBuilder('phone')
+        .select(['COUNT(id) AS phones', 'battery'])
+        .groupBy('battery')
+        .execute(),
+      this.phonesRepository
+        .createQueryBuilder('phone')
+        .select(['COUNT(id) AS phones', 'camera'])
+        .groupBy('camera')
+        .execute(),
+      this.phonesRepository
+        .createQueryBuilder('phone')
+        .select(['COUNT(id) AS phones', 'os'])
+        .groupBy('os')
+        .execute(),
+      this.phonesRepository
+        .createQueryBuilder('phone')
+        .select(['MIN(price) AS min', 'MAX(price) AS max'])
+        .execute(),
+    ]);
   }
 }

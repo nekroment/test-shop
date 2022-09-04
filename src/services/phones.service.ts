@@ -1,8 +1,8 @@
 import { InjectRepository } from '@nestjs/typeorm';
 import { Injectable } from '@nestjs/common';
-import { Repository } from 'typeorm';
+import { Repository, SelectQueryBuilder } from 'typeorm';
 
-import { Phones } from 'src/entities';
+import { Brands, Phones } from 'src/entities';
 import {
   GroupByMemory,
   GroupByRam,
@@ -12,7 +12,9 @@ import {
   GroupByOs,
   PriceRange,
   Phone,
+  PhoneModel,
 } from 'src/resources';
+import { GetPhonesByFilters } from 'src/modules/filters/resources';
 
 @Injectable()
 export class PhonesService {
@@ -37,6 +39,94 @@ export class PhonesService {
       },
     });
     await this.phonesRepository.save(phone);
+  }
+
+  async getPhonesByFilters(data: GetPhonesByFilters): Promise<PhoneModel[]> {
+    const {
+      take,
+      skip,
+      name,
+      min_price,
+      max_price,
+      memories,
+      ram,
+      batteries,
+      diagonals,
+      cameras,
+      os,
+      brands,
+    } = data;
+
+    const request = await this.phonesRepository
+      .createQueryBuilder('phone')
+      .leftJoinAndSelect(
+        (qb: SelectQueryBuilder<any>) =>
+          qb.select(['id AS id_brand', 'name AS brand_name']).from(Brands, 'b'),
+        'brand',
+        'brand.id_brand = phone.brand_id',
+      )
+      .select([
+        'id',
+        'name',
+        'price',
+        'memory',
+        'ram',
+        'diagonal',
+        'battery',
+        'camera',
+        'os',
+        'image',
+        'brand.id_brand AS brand_id',
+        'brand.brand_name AS brand_name',
+      ])
+      .where('name LIKE :name', { name: `%${name}%` })
+      .andWhere('price >= :min', { min: min_price })
+      .andWhere('price <= :max', { max: max_price })
+      .limit(take)
+      .offset(skip);
+
+    if (memories) {
+      request.andWhere('memory IN (:...memories)', {
+        memories,
+      });
+    }
+    if (ram) {
+      request.andWhere('ram IN (:...ram)', {
+        ram,
+      });
+    }
+
+    if (batteries) {
+      request.andWhere('battery IN (:...batteries)', {
+        batteries,
+      });
+    }
+
+    if (diagonals) {
+      request.andWhere('diagonal IN (:...diagonals)', {
+        diagonals,
+      });
+    }
+
+    if (cameras) {
+      request.andWhere('camera IN (:...cameras)', {
+        cameras,
+      });
+    }
+
+    if (os) {
+      request.andWhere('os IN (:...os)', {
+        os,
+      });
+    }
+
+    if (brands) {
+      request.andWhere('brand_id IN (:...brands)', {
+        brands,
+      });
+    }
+
+    return request.execute();
   }
 
   async findPhoneById(id: number): Promise<Phones> {

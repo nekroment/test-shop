@@ -41,7 +41,6 @@ export class Phones {
   @Column({ type: 'enum', enum: OS })
   os: OS;
 
-  @Column()
   @Column('json', { default: null, nullable: true })
   image?: PhoneImagesType;
 

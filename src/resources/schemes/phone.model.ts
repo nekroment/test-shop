@@ -33,4 +33,10 @@ export class PhoneModel {
 
   @Field(() => PhoneImages, { nullable: true })
   phone_images: PhoneImages;
+
+  @Field(() => Int)
+  brand_id: number;
+
+  @Field()
+  brand_name: string;
 }

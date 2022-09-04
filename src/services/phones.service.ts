@@ -55,7 +55,7 @@ export class PhonesService {
       GroupByBattery[],
       GroupByCamera[],
       GroupByOs[],
-      PriceRange[],
+      PriceRange,
     ]
   > {
     return await Promise.all([
@@ -92,7 +92,7 @@ export class PhonesService {
       this.phonesRepository
         .createQueryBuilder('phone')
         .select(['MIN(price) AS min', 'MAX(price) AS max'])
-        .execute(),
+        .getRawOne(),
     ]);
   }
 }

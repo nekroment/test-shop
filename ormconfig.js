@@ -14,7 +14,7 @@ const config = {
   synchronize: true,
   logging: false,
   entities: process.env.BUILD
-    ? [__dirname + '/dist/src/entities/*.entity.js']
+    ? [__dirname + '/dist/entities/*.entity.js']
     : [__dirname + '/src/entities/*.entity.ts'],
   // eslint-disable-next-line prettier/prettier
   migrations: process.env.BUILD

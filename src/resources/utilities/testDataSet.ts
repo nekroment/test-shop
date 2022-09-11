@@ -45,6 +45,8 @@ export const testDataSet = async () => {
     });
   }
 
+  const newBrands = await entityManager.find(Brands);
+
   await entityManager.insert(Phones, {
     name: 'Samsung Galaxy A32 4/128GB Black',
     price: 10399,
@@ -60,7 +62,7 @@ export const testDataSet = async () => {
       ],
     },
     brand: {
-      name: brandsName[2],
+      id: newBrands.filter((data) => data.name === brandsName[2])[0].id,
     },
   });
 
@@ -79,7 +81,7 @@ export const testDataSet = async () => {
       ],
     },
     brand: {
-      name: brandsName[2],
+      id: newBrands.filter((data) => data.name === brandsName[2])[0].id,
     },
   });
 
@@ -98,7 +100,7 @@ export const testDataSet = async () => {
       ],
     },
     brand: {
-      name: brandsName[0],
+      id: newBrands.filter((data) => data.name === brandsName[0])[0].id,
     },
   });
 
@@ -117,7 +119,7 @@ export const testDataSet = async () => {
       ],
     },
     brand: {
-      name: brandsName[1],
+      id: newBrands.filter((data) => data.name === brandsName[1])[0].id,
     },
   });
 
@@ -136,7 +138,7 @@ export const testDataSet = async () => {
       ],
     },
     brand: {
-      name: brandsName[1],
+      id: newBrands.filter((data) => data.name === brandsName[1])[0].id,
     },
   });
 
@@ -155,7 +157,7 @@ export const testDataSet = async () => {
       ],
     },
     brand: {
-      name: brandsName[3],
+      id: newBrands.filter((data) => data.name === brandsName[3])[0].id,
     },
   });
 };

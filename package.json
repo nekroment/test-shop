@@ -11,6 +11,7 @@
     "format": "prettier --write \"src/**/*.ts\" \"test/**/*.ts\"",
     "start": "nest start",
     "start:dev": "service mysql stop && docker-compose up -d && BUILD=true env-cmd -f .env nest start --watch",
+    "start:dev-windows": "docker-compose up -d && set BUILD=true && env-cmd -f .env nest start --watch",
     "migration:run": "ts-node --transpile-only ./node_modules/typeorm/cli.js migration:run",
     "migration:generate": "ts-node --transpile-only ./node_modules/typeorm/cli.js migration:generate -n",
     "start:debug": "nest start --debug --watch",

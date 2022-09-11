@@ -8,5 +8,4 @@ export * from './groupByOs.schema';
 export * from './priceRange.schema';
 export * from './groupByRam.schema';
 export * from './getFilters.schema';
-export * from './getPhonesByFilters.schema';
 export * from './getPhones.schema';

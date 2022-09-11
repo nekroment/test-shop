@@ -39,4 +39,7 @@ export class PhoneModel {
 
   @Field()
   brand_name: string;
+
+  @Field()
+  rating: number;
 }

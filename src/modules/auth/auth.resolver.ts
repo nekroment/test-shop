@@ -34,11 +34,11 @@ export class AuthResolver {
     return await this.usersService.findUserById(id);
   }
 
-  @Mutation(() => MessageAnswer)
+  @Mutation(() => User)
   async registration(
     @Args('data') data: Registration,
     @Context(TransformContextPipe) { ip }: ContextType,
-  ): Promise<MessageAnswer> {
+  ): Promise<User> {
     return await this.authService.registration(data, ip);
   }
 }

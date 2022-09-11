@@ -2,7 +2,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Injectable } from '@nestjs/common';
 import { Repository, SelectQueryBuilder } from 'typeorm';
 
-import { Brands, Phones } from 'src/entities';
+import { Brands, Phones, Reviews } from 'src/entities';
 import {
   GroupByMemory,
   GroupByRam,
@@ -14,7 +14,7 @@ import {
   Phone,
   PhoneModel,
 } from 'src/resources';
-import { GetPhonesByFilters } from 'src/modules/filters/resources';
+import { GetPhonesByFilters } from 'src/modules/filters/resources/dto/getPhonesByFilters.dto';
 
 @Injectable()
 export class PhonesService {
@@ -65,6 +65,15 @@ export class PhonesService {
         'brand',
         'brand.id_brand = phone.brand_id',
       )
+      .leftJoinAndSelect(
+        (qb: SelectQueryBuilder<any>) =>
+          qb
+            .select(['phone_id', 'AVG(rating) AS rating'])
+            .from(Reviews, 'r')
+            .groupBy('r.phone_id'),
+        'review',
+        'review.phone_id = phone.id',
+      )
       .select([
         'id',
         'name',
@@ -78,6 +87,7 @@ export class PhonesService {
         'image',
         'brand.id_brand AS brand_id',
         'brand.brand_name AS brand_name',
+        'review.rating AS rating',
       ])
       .where('name LIKE :name', { name: `%${name}%` })
       .andWhere('price >= :min', { min: min_price })
@@ -126,7 +136,11 @@ export class PhonesService {
       });
     }
 
-    return request.execute();
+    const result: PhoneModel[] = await request.execute();
+    for (const element of result) {
+      element.rating = !element.rating ? 0 : element.rating;
+    }
+    return result;
   }
 
   async findPhoneById(id: number): Promise<Phones> {

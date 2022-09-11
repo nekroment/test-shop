@@ -11,4 +11,6 @@ export const errorCode = {
   login: 'LOGIN_ERROR',
   tfa: 'TFA_ERROR',
   admin: 'ADMIN_ERROR',
+  deadlock: 'DEADLOCK_ERROR',
+  review: 'REVIEW_ERROR',
 };

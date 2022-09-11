@@ -7,3 +7,4 @@ export * from './ipFormat';
 export * from './validateToken';
 export * from './getJWTToken';
 export * from './verifyJWTToken';
+export * from './initQueryRunner';

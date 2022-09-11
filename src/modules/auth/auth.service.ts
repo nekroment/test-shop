@@ -67,7 +67,7 @@ export class AuthService {
     return info;
   }
 
-  async registration(data: Registration, ip: string): Promise<MessageAnswer> {
+  async registration(data: Registration, ip: string): Promise<User> {
     await checkEmail(data.email);
     await this.usersService.checkUserExist(
       data.email,
@@ -78,8 +78,16 @@ export class AuthService {
       ip,
       ...data,
     });
-    return {
-      message: authSuccesses.register,
+    const user = await this.usersService.checkUserExist(data.email);
+    const tokenInfo: UserJWTokenType = {
+      _id: user.id,
+      _ip: ip,
     };
+    const token = getJWTToken(tokenInfo);
+    const info: User = {
+      ...user,
+      token,
+    };
+    return info;
   }
 }

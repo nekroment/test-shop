@@ -84,7 +84,7 @@ export class PhonesService {
         'battery',
         'camera',
         'os',
-        'image',
+        'image AS phone_images',
         'brand.id_brand AS brand_id',
         'brand.brand_name AS brand_name',
         'review.rating AS rating',
@@ -140,6 +140,7 @@ export class PhonesService {
     for (const element of result) {
       element.rating = !element.rating ? 0 : element.rating;
     }
+    console.log(result);
     return result;
   }
 

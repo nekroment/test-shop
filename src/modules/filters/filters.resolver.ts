@@ -1,7 +1,7 @@
 import { UseGuards } from '@nestjs/common';
-import { Args, Context, Mutation, Query, Resolver } from '@nestjs/graphql';
+import { Args, Context, Int, Mutation, Query, Resolver } from '@nestjs/graphql';
 import { AuthGuard } from 'src/guards';
-import { MessageAnswer, Review } from 'src/resources';
+import { MessageAnswer, PhoneModel, Review } from 'src/resources';
 import { ContextType, TransformContextPipe } from 'src/resources/pipes';
 
 import { PhonesService } from 'src/services/phones.service';
@@ -26,10 +26,14 @@ export class FiltersResolver {
 
   @Query(() => GetPhones)
   async getPhones(@Args('data') data: GetPhonesByFilters): Promise<GetPhones> {
-    const phones = await this.phonesService.getPhonesByFilters(data);
-    return {
-      phones,
-    };
+    return await this.phonesService.getPhonesByFilters(data);
+  }
+
+  @Query(() => PhoneModel)
+  async getPhone(
+    @Args('id', { type: () => Int }) id: number,
+  ): Promise<PhoneModel> {
+    return await this.phonesService.findPhoneById(id);
   }
 
   @Query(() => [Review])

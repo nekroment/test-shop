@@ -1,4 +1,4 @@
-import { Field, ObjectType } from '@nestjs/graphql';
+import { Field, Int, ObjectType } from '@nestjs/graphql';
 
 import { PhoneModel } from 'src/resources';
 
@@ -6,4 +6,7 @@ import { PhoneModel } from 'src/resources';
 export class GetPhones {
   @Field(() => [PhoneModel])
   phones: PhoneModel[];
+
+  @Field(() => Int)
+  total: number;
 }

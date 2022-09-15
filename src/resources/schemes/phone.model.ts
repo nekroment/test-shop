@@ -42,4 +42,13 @@ export class PhoneModel {
 
   @Field()
   rating: number;
+
+  @Field({ nullable: true })
+  percentage: number;
+
+  @Field({ nullable: true })
+  start_time: Date;
+
+  @Field({ nullable: true })
+  end_time: Date;
 }

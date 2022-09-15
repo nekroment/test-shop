@@ -40,13 +40,11 @@ export const initQueryRunner = async (data: InitQueryType) => {
       error.message.includes(transactionError) &&
       (attemts > 1 || disableAttemts)
     ) {
-      console.log(transactionError);
       await initQueryRunner({
         ...data,
         attemts: disableAttemts ? attemts : attemts - 1,
       });
     } else if (attemts <= 1) {
-      console.log(error);
       throw new CustomError(
         `Something went wrong! Please, try again.`,
         errorCode.deadlock,

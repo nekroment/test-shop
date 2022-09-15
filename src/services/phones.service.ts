@@ -2,7 +2,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Injectable } from '@nestjs/common';
 import { Repository, SelectQueryBuilder } from 'typeorm';
 
-import { Brands, Phones, Reviews } from 'src/entities';
+import { Brands, Phones, Reviews, Stocks } from 'src/entities';
 import {
   GroupByMemory,
   GroupByRam,
@@ -41,7 +41,10 @@ export class PhonesService {
     await this.phonesRepository.save(phone);
   }
 
-  async getPhonesByFilters(data: GetPhonesByFilters): Promise<PhoneModel[]> {
+  async getPhonesByFilters(data: GetPhonesByFilters): Promise<{
+    phones: PhoneModel[];
+    total: number;
+  }> {
     const {
       take,
       skip,
@@ -57,7 +60,85 @@ export class PhonesService {
       brands,
     } = data;
 
-    const request = await this.phonesRepository
+    const format = this.getRepositoryPhoneFormat();
+    const allPhones = format
+      .where('name LIKE :name', { name: `%${name}%` })
+      .andWhere('price >= :min', { min: min_price })
+      .andWhere('price <= :max', { max: max_price });
+    const phones = allPhones.limit(take).offset(skip);
+
+    if (memories) {
+      [allPhones, phones].forEach((data) =>
+        data.andWhere('memory IN (:...memories)', {
+          memories,
+        }),
+      );
+    }
+    if (ram) {
+      [allPhones, phones].forEach((data) =>
+        data.andWhere('ram IN (:...ram)', {
+          ram,
+        }),
+      );
+    }
+
+    if (batteries) {
+      [allPhones, phones].forEach((data) =>
+        data.andWhere('battery IN (:...batteries)', {
+          batteries,
+        }),
+      );
+    }
+
+    if (diagonals) {
+      [allPhones, phones].forEach((data) =>
+        data.andWhere('diagonal IN (:...diagonals)', {
+          diagonals,
+        }),
+      );
+    }
+
+    if (cameras) {
+      [allPhones, phones].forEach((data) =>
+        data.andWhere('camera IN (:...cameras)', {
+          cameras,
+        }),
+      );
+    }
+
+    if (os) {
+      [allPhones, phones].forEach((data) =>
+        data.andWhere('os IN (:...os)', {
+          os,
+        }),
+      );
+    }
+
+    if (brands) {
+      [allPhones, phones].forEach((data) =>
+        data.andWhere('brand_id IN (:...brands)', {
+          brands,
+        }),
+      );
+    }
+    const total = await allPhones.getCount();
+    const result: PhoneModel[] = await phones.execute();
+    for (const element of result) {
+      element.rating = !element.rating ? 0 : element.rating;
+    }
+    return {
+      total,
+      phones: result,
+    };
+  }
+
+  async findPhoneById(id: number): Promise<PhoneModel> {
+    const format = this.getRepositoryPhoneFormat();
+    return await format.where('id = :id', { id }).getRawOne();
+  }
+
+  getRepositoryPhoneFormat(): SelectQueryBuilder<Phones> {
+    return this.phonesRepository
       .createQueryBuilder('phone')
       .leftJoinAndSelect(
         (qb: SelectQueryBuilder<any>) =>
@@ -74,6 +155,19 @@ export class PhonesService {
         'review',
         'review.phone_id = phone.id',
       )
+      .leftJoinAndSelect(
+        (qb: SelectQueryBuilder<any>) =>
+          qb
+            .select([
+              'phone_id AS stock_phone_id',
+              'percentage',
+              'start_time',
+              'end_time',
+            ])
+            .from(Stocks, 'st'),
+        'stock',
+        'stock.stock_phone_id = phone.id',
+      )
       .select([
         'id',
         'name',
@@ -88,68 +182,10 @@ export class PhonesService {
         'brand.id_brand AS brand_id',
         'brand.brand_name AS brand_name',
         'review.rating AS rating',
-      ])
-      .where('name LIKE :name', { name: `%${name}%` })
-      .andWhere('price >= :min', { min: min_price })
-      .andWhere('price <= :max', { max: max_price })
-      .limit(take)
-      .offset(skip);
-
-    if (memories) {
-      request.andWhere('memory IN (:...memories)', {
-        memories,
-      });
-    }
-    if (ram) {
-      request.andWhere('ram IN (:...ram)', {
-        ram,
-      });
-    }
-
-    if (batteries) {
-      request.andWhere('battery IN (:...batteries)', {
-        batteries,
-      });
-    }
-
-    if (diagonals) {
-      request.andWhere('diagonal IN (:...diagonals)', {
-        diagonals,
-      });
-    }
-
-    if (cameras) {
-      request.andWhere('camera IN (:...cameras)', {
-        cameras,
-      });
-    }
-
-    if (os) {
-      request.andWhere('os IN (:...os)', {
-        os,
-      });
-    }
-
-    if (brands) {
-      request.andWhere('brand_id IN (:...brands)', {
-        brands,
-      });
-    }
-
-    const result: PhoneModel[] = await request.execute();
-    for (const element of result) {
-      element.rating = !element.rating ? 0 : element.rating;
-    }
-    console.log(result);
-    return result;
-  }
-
-  async findPhoneById(id: number): Promise<Phones> {
-    return await this.phonesRepository.findOne({
-      where: {
-        id,
-      },
-    });
+        'stock.percentage AS percentage',
+        'stock.start_time AS start_time',
+        'stock.end_time AS end_time',
+      ]);
   }
 
   async groupByMemory(): Promise<

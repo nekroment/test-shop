@@ -33,6 +33,9 @@ export class Reviews {
   @Column({ type: 'datetime', default: () => 'CURRENT_TIMESTAMP' })
   datetime: string;
 
+  @Column({ type: 'datetime', default: null })
+  updated: string;
+
   @DeleteDateColumn()
   deletedAt?: Date;
 }

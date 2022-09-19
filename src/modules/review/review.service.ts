@@ -2,7 +2,12 @@ import { Injectable } from '@nestjs/common';
 import { Connection, QueryRunner } from 'typeorm';
 
 import { ReviewsService } from 'src/services/reviews.service';
-import { CreateReview, reviewErrors, reviewSuccesses } from './resources';
+import {
+  CreateReview,
+  reviewErrors,
+  reviewSuccesses,
+  UpdateReview,
+} from './resources';
 import {
   CustomError,
   errorCode,
@@ -18,6 +23,21 @@ export class ReviewService {
     private phonesService: PhonesService,
     private connection: Connection,
   ) {}
+
+  async updateReview(
+    user_id: number,
+    data: UpdateReview,
+  ): Promise<MessageAnswer> {
+    const { review_id } = data;
+    const review = await this.reviewsService.getReviewById(review_id, user_id);
+    if (!review) {
+      throw new CustomError(reviewErrors.reviewNotExist, errorCode.review);
+    }
+    await this.reviewsService.updateREview(data);
+    return {
+      message: reviewSuccesses.updateReview,
+    };
+  }
 
   async createReview(
     user_id: number,

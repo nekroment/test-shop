@@ -2,7 +2,7 @@ import { Injectable } from '@nestjs/common';
 
 import { PhonesService } from 'src/services/phones.service';
 import { BrandsService } from 'src/services/brands.service';
-import { GetFilters } from './resources';
+import { GetFilters, GetFiltersDto } from './resources';
 
 @Injectable()
 export class FiltersService {
@@ -11,10 +11,10 @@ export class FiltersService {
     private phonesService: PhonesService,
   ) {}
 
-  async getFilters(): Promise<GetFilters> {
+  async getFilters(data: GetFiltersDto): Promise<GetFilters> {
     const [brands, filters] = await Promise.all([
-      this.brandsService.groupByBrands(),
-      this.phonesService.groupByMemory(),
+      this.brandsService.groupByBrands(data),
+      this.phonesService.groupByMemory(data),
     ]);
     return {
       brands,

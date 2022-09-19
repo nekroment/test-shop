@@ -2,9 +2,8 @@ import { Args, Int, Query, Resolver } from '@nestjs/graphql';
 
 import { PhoneModel } from 'src/resources';
 import { PhonesService } from 'src/services/phones.service';
-import { ReviewsService } from 'src/services/reviews.service';
 import { FiltersService } from './filters.service';
-import { GetFilters, GetPhones } from './resources';
+import { GetFilters, GetFiltersDto, GetPhones } from './resources';
 import { GetPhonesByFilters } from './resources/dto/getPhonesByFilters.dto';
 
 @Resolver()
@@ -12,12 +11,11 @@ export class FiltersResolver {
   constructor(
     private filtersService: FiltersService,
     private phonesService: PhonesService,
-    private reviewsService: ReviewsService,
   ) {}
 
   @Query(() => GetFilters)
-  async getFilters(): Promise<GetFilters> {
-    return await this.filtersService.getFilters();
+  async getFilters(@Args('data') data: GetFiltersDto): Promise<GetFilters> {
+    return await this.filtersService.getFilters(data);
   }
 
   @Query(() => GetPhones)

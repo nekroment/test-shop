@@ -4,12 +4,15 @@ import { Repository, SelectQueryBuilder } from 'typeorm';
 
 import { GroupByBrands } from './../resources/interfaces/brands';
 import { Brands, Phones } from 'src/entities';
+import { GetFiltersDto } from 'src/modules/filters/resources';
+import { PhonesService } from './phones.service';
 
 @Injectable()
 export class BrandsService {
   constructor(
     @InjectRepository(Brands)
     private brandsRepository: Repository<Brands>,
+    private phonesService: PhonesService,
   ) {}
 
   async adminAddBrand(name: string): Promise<void> {
@@ -27,12 +30,14 @@ export class BrandsService {
     });
   }
 
-  async groupByBrands(): Promise<GroupByBrands[]> {
+  async groupByBrands(data: GetFiltersDto): Promise<GroupByBrands[]> {
     return await this.brandsRepository
       .createQueryBuilder('brand')
       .leftJoinAndSelect(
         (qb: SelectQueryBuilder<any>) =>
-          qb.select(['id AS phone_id', 'brand_id']).from(Phones, 'ph'),
+          this.phonesService
+            .addFilter(data, qb.select(['id AS phone_id', 'brand_id']))
+            .from(Phones, 'ph'),
         'phone',
         'phone.brand_id = brand.id',
       )

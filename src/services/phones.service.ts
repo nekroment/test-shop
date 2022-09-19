@@ -15,6 +15,7 @@ import {
   PhoneModel,
 } from 'src/resources';
 import { GetPhonesByFilters } from 'src/modules/filters/resources/dto/getPhonesByFilters.dto';
+import { GetFiltersDto } from 'src/modules/filters/resources';
 
 @Injectable()
 export class PhonesService {
@@ -41,13 +42,8 @@ export class PhonesService {
     await this.phonesRepository.save(phone);
   }
 
-  async getPhonesByFilters(data: GetPhonesByFilters): Promise<{
-    phones: PhoneModel[];
-    total: number;
-  }> {
+  addFilter(data: GetFiltersDto, query: SelectQueryBuilder<Phones>) {
     const {
-      take,
-      skip,
       name,
       min_price,
       max_price,
@@ -60,67 +56,64 @@ export class PhonesService {
       brands,
     } = data;
 
-    const format = this.getRepositoryPhoneFormat();
-    const allPhones = format
+    const filters = query
       .where('name LIKE :name', { name: `%${name}%` })
       .andWhere('price >= :min', { min: min_price })
       .andWhere('price <= :max', { max: max_price });
-    const phones = allPhones.limit(take).offset(skip);
 
     if (memories) {
-      [allPhones, phones].forEach((data) =>
-        data.andWhere('memory IN (:...memories)', {
-          memories,
-        }),
-      );
+      filters.andWhere('memory IN (:...memories)', {
+        memories,
+      });
     }
     if (ram) {
-      [allPhones, phones].forEach((data) =>
-        data.andWhere('ram IN (:...ram)', {
-          ram,
-        }),
-      );
+      filters.andWhere('ram IN (:...ram)', {
+        ram,
+      });
     }
 
     if (batteries) {
-      [allPhones, phones].forEach((data) =>
-        data.andWhere('battery IN (:...batteries)', {
-          batteries,
-        }),
-      );
+      filters.andWhere('battery IN (:...batteries)', {
+        batteries,
+      });
     }
 
     if (diagonals) {
-      [allPhones, phones].forEach((data) =>
-        data.andWhere('diagonal IN (:...diagonals)', {
-          diagonals,
-        }),
-      );
+      filters.andWhere('diagonal IN (:...diagonals)', {
+        diagonals,
+      });
     }
 
     if (cameras) {
-      [allPhones, phones].forEach((data) =>
-        data.andWhere('camera IN (:...cameras)', {
-          cameras,
-        }),
-      );
+      filters.andWhere('camera IN (:...cameras)', {
+        cameras,
+      });
     }
 
     if (os) {
-      [allPhones, phones].forEach((data) =>
-        data.andWhere('os IN (:...os)', {
-          os,
-        }),
-      );
+      filters.andWhere('os IN (:...os)', {
+        os,
+      });
     }
 
     if (brands) {
-      [allPhones, phones].forEach((data) =>
-        data.andWhere('brand_id IN (:...brands)', {
-          brands,
-        }),
-      );
+      filters.andWhere('brand_id IN (:...brands)', {
+        brands,
+      });
     }
+
+    return filters;
+  }
+
+  async getPhonesByFilters(data: GetPhonesByFilters): Promise<{
+    phones: PhoneModel[];
+    total: number;
+  }> {
+    const { take, skip } = data;
+    let allPhones = this.getRepositoryPhoneFormat();
+    allPhones = this.addFilter(data, allPhones);
+    const phones = allPhones.limit(take).offset(skip);
+
     const total = await allPhones.getCount();
     const result: PhoneModel[] = await phones.execute();
     for (const element of result) {
@@ -190,7 +183,9 @@ export class PhonesService {
       ]);
   }
 
-  async groupByMemory(): Promise<
+  async groupByMemory(
+    data: GetFiltersDto,
+  ): Promise<
     [
       GroupByMemory[],
       GroupByRam[],
@@ -202,36 +197,50 @@ export class PhonesService {
     ]
   > {
     return await Promise.all([
-      this.phonesRepository
-        .createQueryBuilder('phone')
-        .select(['COUNT(id) AS phones', 'memory'])
-        .groupBy('memory')
-        .execute(),
-      this.phonesRepository
-        .createQueryBuilder('phone')
-        .select(['COUNT(id) AS phones', 'ram'])
-        .groupBy('ram')
-        .execute(),
-      this.phonesRepository
-        .createQueryBuilder('phone')
-        .select(['COUNT(id) AS phones', 'diagonal'])
-        .groupBy('diagonal')
-        .execute(),
-      this.phonesRepository
-        .createQueryBuilder('phone')
-        .select(['COUNT(id) AS phones', 'battery'])
-        .groupBy('battery')
-        .execute(),
-      this.phonesRepository
-        .createQueryBuilder('phone')
-        .select(['COUNT(id) AS phones', 'camera'])
-        .groupBy('camera')
-        .execute(),
-      this.phonesRepository
-        .createQueryBuilder('phone')
-        .select(['COUNT(id) AS phones', 'os'])
-        .groupBy('os')
-        .execute(),
+      this.addFilter(
+        data,
+        this.phonesRepository
+          .createQueryBuilder('phone')
+          .select(['COUNT(id) AS phones', 'memory'])
+          .groupBy('memory'),
+      ).execute(),
+      this.addFilter(
+        data,
+        this.phonesRepository
+          .createQueryBuilder('phone')
+          .select(['COUNT(id) AS phones', 'ram'])
+          .groupBy('ram'),
+      ).execute(),
+
+      this.addFilter(
+        data,
+        this.phonesRepository
+          .createQueryBuilder('phone')
+          .select(['COUNT(id) AS phones', 'diagonal'])
+          .groupBy('diagonal'),
+      ).execute(),
+
+      this.addFilter(
+        data,
+        this.phonesRepository
+          .createQueryBuilder('phone')
+          .select(['COUNT(id) AS phones', 'battery'])
+          .groupBy('battery'),
+      ).execute(),
+      this.addFilter(
+        data,
+        this.phonesRepository
+          .createQueryBuilder('phone')
+          .select(['COUNT(id) AS phones', 'camera'])
+          .groupBy('camera'),
+      ).execute(),
+      this.addFilter(
+        data,
+        this.phonesRepository
+          .createQueryBuilder('phone')
+          .select(['COUNT(id) AS phones', 'os'])
+          .groupBy('os'),
+      ).execute(),
       this.phonesRepository
         .createQueryBuilder('phone')
         .select(['MIN(price) AS min', 'MAX(price) AS max'])

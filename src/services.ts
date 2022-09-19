@@ -1,6 +1,7 @@
 import { AdminSerivce } from './modules/admin';
 import { AuthService } from './modules/auth';
 import { FiltersService } from './modules/filters';
+import { ReviewService } from './modules/review/review.service';
 import { TfaService } from './modules/tfa';
 import { BrandsService } from './services/brands.service';
 import { PhonesService } from './services/phones.service';
@@ -18,4 +19,5 @@ export const SERVICES = [
   StocksService,
   FiltersService,
   ReviewsService,
+  ReviewService,
 ];

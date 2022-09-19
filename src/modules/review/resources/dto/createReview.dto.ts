@@ -1,21 +1,22 @@
 import { Field, InputType, Int } from '@nestjs/graphql';
 import { Min, Max, MaxLength } from 'class-validator';
-import { filterErrors } from '../messages';
+
+import { reviewErrors } from './../message';
 
 @InputType()
 export class CreateReview {
   @Field(() => Int)
   @Min(1, {
-    message: filterErrors.rating,
+    message: reviewErrors.rating,
   })
   @Max(5, {
-    message: filterErrors.rating,
+    message: reviewErrors.rating,
   })
   rating: number;
 
   @Field()
   @MaxLength(128, {
-    message: filterErrors.commentLength,
+    message: reviewErrors.commentLength,
   })
   comment: string;
 

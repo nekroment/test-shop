@@ -1,5 +1,5 @@
 import { UseGuards } from '@nestjs/common';
-import { Args, Context, Mutation, Query, Resolver } from '@nestjs/graphql';
+import { Args, Context, Int, Mutation, Query, Resolver } from '@nestjs/graphql';
 
 import { AuthGuard } from 'src/guards';
 import { MessageAnswer, Review } from 'src/resources';
@@ -31,6 +31,15 @@ export class ReviewResolver {
     @Context(TransformContextPipe) { id }: ContextType,
   ): Promise<MessageAnswer> {
     return await this.reviewService.updateReview(id, data);
+  }
+
+  @Mutation(() => MessageAnswer)
+  @UseGuards(AuthGuard)
+  async deleteReview(
+    @Args('id', { type: () => Int }) review_id: number,
+    @Context(TransformContextPipe) { id }: ContextType,
+  ): Promise<MessageAnswer> {
+    return await this.reviewService.deleteReview(id, review_id);
   }
 
   @Query(() => [Review])

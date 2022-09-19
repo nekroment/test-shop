@@ -33,9 +33,21 @@ export class ReviewService {
     if (!review) {
       throw new CustomError(reviewErrors.reviewNotExist, errorCode.review);
     }
-    await this.reviewsService.updateREview(data);
+    await this.reviewsService.updateReview(data);
+
     return {
       message: reviewSuccesses.updateReview,
+    };
+  }
+
+  async deleteReview(user_id: number, id: number): Promise<MessageAnswer> {
+    const review = await this.reviewsService.getReviewById(id, user_id);
+    if (!review) {
+      throw new CustomError(reviewErrors.reviewNotExist, errorCode.review);
+    }
+
+    return {
+      message: reviewSuccesses.deleteReview,
     };
   }
 

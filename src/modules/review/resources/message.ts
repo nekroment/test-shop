@@ -9,4 +9,5 @@ export const reviewErrors = {
 export const reviewSuccesses = {
   createReview: 'Your review has been successfully saved!',
   updateReview: 'Your review has been successfully updated!',
+  deleteReview: 'Your review has been successfully deleted!',
 };

@@ -25,7 +25,7 @@ export class ReviewsService {
     });
   }
 
-  async updateREview(data: UpdateReview): Promise<void> {
+  async updateReview(data: UpdateReview): Promise<void> {
     const { review_id, comment, rating } = data;
     const updated = getFormatDate();
     await this.reviewsRepository.update(review_id, {
@@ -33,6 +33,10 @@ export class ReviewsService {
       rating,
       updated,
     });
+  }
+
+  async deleteReview(id: number): Promise<void> {
+    await this.reviewsRepository.delete(id);
   }
 
   async getPhoneReviews(

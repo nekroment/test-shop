@@ -134,7 +134,9 @@ export class PhonesService {
 
   async findPhoneById(id: number): Promise<PhoneModel> {
     const format = this.getRepositoryPhoneFormat();
-    return await format.where('id = :id', { id }).getRawOne();
+    const result = await format.where('id = :id', { id }).getRawOne();
+    result.rating = !result.rating ? 0 : result.rating;
+    return result;
   }
 
   getRepositoryPhoneFormat(): SelectQueryBuilder<Phones> {

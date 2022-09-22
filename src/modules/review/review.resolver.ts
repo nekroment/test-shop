@@ -1,19 +1,23 @@
-import { UseGuards } from '@nestjs/common';
+import { UseGuards, UseInterceptors } from '@nestjs/common';
 import { Args, Context, Int, Mutation, Query, Resolver } from '@nestjs/graphql';
 
 import { AuthGuard } from 'src/guards';
-import { MessageAnswer, Review } from 'src/resources';
+import { CheckAuthInterceptor } from 'src/interceptors';
+import { MessageAnswer } from 'src/resources';
 import { ContextType, TransformContextPipe } from 'src/resources/pipes';
-import { ReviewsService } from 'src/services/reviews.service';
-import { CreateReview, UpdateReview, GetPhoneReviews } from './resources/dto';
+import { GetReviews } from './resources';
+import {
+  CreateReview,
+  UpdateReview,
+  GetPhoneReviews,
+  RateReview,
+} from './resources/dto';
 import { ReviewService } from './review.service';
 
+@UseInterceptors(CheckAuthInterceptor)
 @Resolver()
 export class ReviewResolver {
-  constructor(
-    private reviewService: ReviewService,
-    private reviewsService: ReviewsService,
-  ) {}
+  constructor(private reviewService: ReviewService) {}
 
   @Mutation(() => MessageAnswer)
   @UseGuards(AuthGuard)
@@ -42,9 +46,20 @@ export class ReviewResolver {
     return await this.reviewService.deleteReview(id, review_id);
   }
 
-  @Query(() => [Review])
-  async getReviews(@Args('data') data: GetPhoneReviews): Promise<Review[]> {
-    const { phone_id, take, skip } = data;
-    return await this.reviewsService.getPhoneReviews(phone_id, take, skip);
+  @Mutation(() => MessageAnswer)
+  @UseGuards(AuthGuard)
+  async rateReview(
+    @Args('data') data: RateReview,
+    @Context(TransformContextPipe) { id }: ContextType,
+  ): Promise<MessageAnswer> {
+    return await this.reviewService.rateReview(data, id);
+  }
+
+  @Query(() => GetReviews)
+  async getReviews(
+    @Args('data') data: GetPhoneReviews,
+    @Context(TransformContextPipe) { id }: ContextType,
+  ): Promise<GetReviews> {
+    return await this.reviewService.getReviews(data, id);
   }
 }

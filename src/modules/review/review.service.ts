@@ -4,6 +4,9 @@ import { Connection, QueryRunner } from 'typeorm';
 import { ReviewsService } from 'src/services/reviews.service';
 import {
   CreateReview,
+  GetPhoneReviews,
+  GetReviews,
+  RateReview,
   reviewErrors,
   reviewSuccesses,
   UpdateReview,
@@ -13,6 +16,7 @@ import {
   errorCode,
   initQueryRunner,
   MessageAnswer,
+  TransactionLockType,
 } from 'src/resources';
 import { PhonesService } from 'src/services/phones.service';
 
@@ -23,6 +27,49 @@ export class ReviewService {
     private phonesService: PhonesService,
     private connection: Connection,
   ) {}
+
+  async rateReview(data: RateReview, user_id: number): Promise<MessageAnswer> {
+    const { review_id, rating } = data;
+    let message = '';
+    const review = await this.reviewsService.getReviewById(review_id, user_id);
+    if (!review) {
+      throw new CustomError(reviewErrors.reviewNotExist, errorCode.review);
+    }
+    const methods = async (query: QueryRunner) => {
+      const rateExist = await this.reviewsService.getUserRate(
+        review_id,
+        user_id,
+        query,
+      );
+      if (rateExist) {
+        await this.reviewsService.deleteRate(
+          rateExist.id,
+          review_id,
+          !rateExist.rate,
+          query,
+        );
+        message = reviewSuccesses.updateRate;
+      } else {
+        await this.reviewsService.addUserRate(
+          review_id,
+          user_id,
+          rating,
+          query,
+        );
+        message = reviewSuccesses.addRate;
+      }
+    };
+    await initQueryRunner({
+      methods,
+      connect: this.connection,
+      lock: TransactionLockType.SERIALIZABLE,
+      disableAttemts: true,
+    });
+
+    return {
+      message,
+    };
+  }
 
   async updateReview(
     user_id: number,
@@ -48,6 +95,21 @@ export class ReviewService {
     await this.reviewsService.deleteReview(id);
     return {
       message: reviewSuccesses.deleteReview,
+    };
+  }
+
+  async getReviews(
+    data: GetPhoneReviews,
+    user_id?: number,
+  ): Promise<GetReviews> {
+    const { phone_id, take, skip } = data;
+    const [reviews, total] = await Promise.all([
+      this.reviewsService.getPhoneReviews(phone_id, take, skip, user_id),
+      this.reviewsService.reviewsCount(phone_id),
+    ]);
+    return {
+      reviews,
+      total,
     };
   }
 

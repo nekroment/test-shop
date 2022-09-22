@@ -36,6 +36,9 @@ export class Reviews {
   @Column({ type: 'datetime', default: null })
   updated: string;
 
+  @Column({ type: 'int', default: 0 })
+  review_rating: number;
+
   @DeleteDateColumn()
   deletedAt?: Date;
 }

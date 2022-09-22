@@ -19,6 +19,12 @@ export class Review {
   @Field()
   datetime: string;
 
+  @Field()
+  review_rating: number;
+
+  @Field({ nullable: true })
+  user_rating: boolean;
+
   @Field({ nullable: true })
   updated: string;
 }

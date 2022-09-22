@@ -12,7 +12,10 @@
     "baseUrl": "./",
     "incremental": true,
     "paths": {
-      "src/*": ["src/*"]
+      "src/*": ["src/*"],
+      "~entities": ["./src/entities"],
+      "~resources": ["./src/resources"],
+      "~guards": ["./src/guards"]
     }
   },
   "exclude": ["migrations"]

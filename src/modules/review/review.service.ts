@@ -45,7 +45,7 @@ export class ReviewService {
     if (!review) {
       throw new CustomError(reviewErrors.reviewNotExist, errorCode.review);
     }
-
+    await this.reviewsService.deleteReview(id);
     return {
       message: reviewSuccesses.deleteReview,
     };

@@ -18,4 +18,7 @@ export class Review {
 
   @Field()
   datetime: string;
+
+  @Field({ nullable: true })
+  updated: string;
 }

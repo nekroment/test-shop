@@ -5,13 +5,14 @@ import { AuthGuard } from 'src/guards';
 import { CheckAuthInterceptor } from 'src/interceptors';
 import { MessageAnswer } from 'src/resources';
 import { ContextType, TransformContextPipe } from 'src/resources/pipes';
-import { GetReviews } from './resources';
+import { GetComments, GetReviews } from './resources';
 import {
   CreateReview,
   UpdateReview,
   GetPhoneReviews,
   RateReview,
   CreateComment,
+  GetReviewComments,
 } from './resources/dto';
 import { ReviewService } from './review.service';
 
@@ -71,5 +72,13 @@ export class ReviewResolver {
     @Context(TransformContextPipe) { id }: ContextType,
   ): Promise<GetReviews> {
     return await this.reviewService.getReviews(data, id);
+  }
+
+  @Query(() => GetComments)
+  async getComments(
+    @Args('data') data: GetReviewComments,
+    @Context(TransformContextPipe) { id }: ContextType,
+  ): Promise<GetComments> {
+    return await this.reviewService.getComments(data, id);
   }
 }

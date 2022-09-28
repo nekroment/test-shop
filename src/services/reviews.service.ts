@@ -10,7 +10,7 @@ import {
   Users,
 } from 'src/entities';
 import { CreateReview, UpdateReview } from 'src/modules/review/resources';
-import { getFormatDate, Review } from 'src/resources';
+import { Comment, getFormatDate, Review } from 'src/resources';
 
 @Injectable()
 export class ReviewsService {
@@ -24,6 +24,71 @@ export class ReviewsService {
     @InjectRepository(Comments)
     private commentsRepository: Repository<Comments>,
   ) {}
+
+  async commentsCount(id: number): Promise<number> {
+    return await this.commentsRepository.count({
+      relations: ['phone'],
+      where: {
+        review: {
+          id,
+        },
+      },
+    });
+  }
+
+  async getComments(
+    id: number,
+    take: number,
+    skip: number,
+    user_id?: number,
+  ): Promise<Comment[]> {
+    const query = this.commentsRepository
+      .createQueryBuilder('comment')
+      .select([
+        'id',
+        'comment',
+        'datetime',
+        'updated',
+        'comment_rating',
+        'review_id',
+      ])
+      .leftJoinAndSelect(
+        (qb: SelectQueryBuilder<any>) =>
+          qb
+            .select(['id AS user_id', 'first_name', 'last_name'])
+            .from(Users, 'u'),
+        'user',
+        'user.user_id = comment.user_id',
+      );
+
+    if (user_id) {
+      query.leftJoinAndSelect(
+        (qb: SelectQueryBuilder<any>) =>
+          qb
+            .select([
+              'comment_id',
+              'user_id AS user_rate_id',
+              'rate AS user_rating',
+            ])
+            .from(CommentRates, 'r'),
+        'rates',
+        `rates.comment_id = comment.id AND rates.user_rate_id = ${user_id}`,
+      );
+    }
+    const result = await query
+      .where('review_id = :id', { id })
+      .offset(skip)
+      .limit(take)
+      .getRawMany();
+    for (const element of result) {
+      element.user = {
+        id: element.user_id,
+        first_name: element.first_name,
+        last_name: element.last_name,
+      };
+    }
+    return result;
+  }
 
   async getUserRate(
     review_id: number,
@@ -136,6 +201,7 @@ export class ReviewsService {
         'datetime',
         'updated',
         'review_rating',
+        'phone_id',
       ])
       .leftJoinAndSelect(
         (qb: SelectQueryBuilder<any>) =>
@@ -160,7 +226,11 @@ export class ReviewsService {
         `rates.review_id = review.id AND rates.user_rate_id = ${user_id}`,
       );
     }
-    const result = await query.offset(skip).limit(take).getRawMany();
+    const result = await query
+      .where('phone_id = :id', { id })
+      .offset(skip)
+      .limit(take)
+      .getRawMany();
     for (const element of result) {
       element.user = {
         id: element.user_id,

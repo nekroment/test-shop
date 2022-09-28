@@ -5,12 +5,14 @@ import { ReviewsService } from 'src/services/reviews.service';
 import {
   CreateComment,
   CreateReview,
+  GetReviewComments,
   GetPhoneReviews,
   GetReviews,
   RateReview,
   reviewErrors,
   reviewSuccesses,
   UpdateReview,
+  GetComments,
 } from './resources';
 import {
   CustomError,
@@ -28,6 +30,22 @@ export class ReviewService {
     private phonesService: PhonesService,
     private connection: Connection,
   ) {}
+
+  async getComments(
+    data: GetReviewComments,
+    user_id?: number,
+  ): Promise<GetComments> {
+    const { review_id, take, skip } = data;
+    const [comments, total] = await Promise.all([
+      this.reviewsService.getComments(review_id, take, skip, user_id),
+      this.reviewsService.commentsCount(review_id),
+    ]);
+
+    return {
+      comments,
+      total,
+    };
+  }
 
   async createComment(
     user_id: number,

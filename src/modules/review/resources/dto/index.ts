@@ -3,3 +3,4 @@ export * from './updateReview.dto';
 export * from './getPhoneReviews.dto';
 export * from './rateReview.dto';
 export * from './createComment.dto';
+export * from './getComments.dto';

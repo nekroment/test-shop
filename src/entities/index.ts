@@ -5,3 +5,5 @@ export * from './stocks.entity';
 export * from './phones.entity';
 export * from './reviews.entity';
 export * from './reviewRates.entity';
+export * from './comments.entity';
+export * from './commentRates.entity';

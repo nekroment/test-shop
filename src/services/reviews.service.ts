@@ -2,7 +2,13 @@ import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { QueryRunner, Repository, SelectQueryBuilder } from 'typeorm';
 
-import { ReviewRates, Reviews, Users } from 'src/entities';
+import {
+  CommentRates,
+  Comments,
+  ReviewRates,
+  Reviews,
+  Users,
+} from 'src/entities';
 import { CreateReview, UpdateReview } from 'src/modules/review/resources';
 import { getFormatDate, Review } from 'src/resources';
 
@@ -13,6 +19,10 @@ export class ReviewsService {
     private reviewsRepository: Repository<Reviews>,
     @InjectRepository(ReviewRates)
     private reviewRatesRepository: Repository<ReviewRates>,
+    @InjectRepository(CommentRates)
+    private commentRatesRepository: Repository<CommentRates>,
+    @InjectRepository(Comments)
+    private commentsRepository: Repository<Comments>,
   ) {}
 
   async getUserRate(
@@ -65,7 +75,7 @@ export class ReviewsService {
     });
   }
 
-  async getReviewById(id: number, user_id: number): Promise<Reviews> {
+  async getUserReview(id: number, user_id: number): Promise<Reviews> {
     return await this.reviewsRepository.findOne({
       relations: ['user'],
       where: {
@@ -73,6 +83,15 @@ export class ReviewsService {
         user: {
           id: user_id,
         },
+      },
+    });
+  }
+
+  async getReviewById(id: number): Promise<Reviews> {
+    return await this.reviewsRepository.findOne({
+      relations: ['user'],
+      where: {
+        id,
       },
     });
   }
@@ -150,6 +169,24 @@ export class ReviewsService {
       };
     }
     return result;
+  }
+
+  async addComment(
+    user_id: number,
+    review_id: number,
+    comment: string,
+  ): Promise<void> {
+    await this.commentsRepository.save(
+      this.commentsRepository.create({
+        review: {
+          id: review_id,
+        },
+        user: {
+          id: user_id,
+        },
+        comment,
+      }),
+    );
   }
 
   async addReview(

@@ -11,5 +11,6 @@ export const reviewSuccesses = {
   updateReview: 'Your review has been successfully updated!',
   deleteReview: 'Your review has been successfully deleted!',
   addRate: 'You have successfully rated this review.',
+  addComment: 'Your comment has been successfully saved!',
   updateRate: 'Your review score has been changed.',
 };

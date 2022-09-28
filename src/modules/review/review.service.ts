@@ -3,6 +3,7 @@ import { Connection, QueryRunner } from 'typeorm';
 
 import { ReviewsService } from 'src/services/reviews.service';
 import {
+  CreateComment,
   CreateReview,
   GetPhoneReviews,
   GetReviews,
@@ -28,10 +29,25 @@ export class ReviewService {
     private connection: Connection,
   ) {}
 
+  async createComment(
+    user_id: number,
+    data: CreateComment,
+  ): Promise<MessageAnswer> {
+    const { comment, review_id } = data;
+    const review = await this.reviewsService.getReviewById(review_id);
+    if (!review) {
+      throw new CustomError(reviewErrors.reviewNotExist, errorCode.review);
+    }
+    await this.reviewsService.addComment(user_id, review_id, comment);
+    return {
+      message: reviewSuccesses.addComment,
+    };
+  }
+
   async rateReview(data: RateReview, user_id: number): Promise<MessageAnswer> {
     const { review_id, rating } = data;
     let message = '';
-    const review = await this.reviewsService.getReviewById(review_id, user_id);
+    const review = await this.reviewsService.getReviewById(review_id);
     if (!review) {
       throw new CustomError(reviewErrors.reviewNotExist, errorCode.review);
     }
@@ -76,7 +92,7 @@ export class ReviewService {
     data: UpdateReview,
   ): Promise<MessageAnswer> {
     const { review_id } = data;
-    const review = await this.reviewsService.getReviewById(review_id, user_id);
+    const review = await this.reviewsService.getUserReview(review_id, user_id);
     if (!review) {
       throw new CustomError(reviewErrors.reviewNotExist, errorCode.review);
     }
@@ -88,7 +104,7 @@ export class ReviewService {
   }
 
   async deleteReview(user_id: number, id: number): Promise<MessageAnswer> {
-    const review = await this.reviewsService.getReviewById(id, user_id);
+    const review = await this.reviewsService.getUserReview(id, user_id);
     if (!review) {
       throw new CustomError(reviewErrors.reviewNotExist, errorCode.review);
     }

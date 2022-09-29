@@ -3,6 +3,7 @@ export const reviewErrors = {
   commentLength: 'The length of the review must not exceed 128 characters.',
   reviewExist: 'You have already rated this item.',
   reviewNotExist: 'Review does not exist.',
+  commentNotExist: 'Comment does not exist.',
   phoneExist: 'This product does not exist.',
 };
 

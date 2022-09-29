@@ -89,6 +89,22 @@ export class ReviewsService {
     return result;
   }
 
+  async getUserCommentRate(
+    comment_id: number,
+    user_id: number,
+    query: QueryRunner,
+  ): Promise<CommentRates> {
+    return await query.manager.findOne(CommentRates, {
+      relations: ['user'],
+      where: {
+        id: comment_id,
+        user: {
+          id: user_id,
+        },
+      },
+    });
+  }
+
   async getUserRate(
     review_id: number,
     user_id: number,
@@ -107,6 +123,18 @@ export class ReviewsService {
     });
   }
 
+  async deleteCommentRate(
+    rate_id: number,
+    comment_id: number,
+    rating: boolean,
+    query: QueryRunner,
+  ): Promise<void> {
+    await query.manager.update(Comments, comment_id, {
+      comment_rating: () => `comment_rating + ${rating ? 1 : -1}`,
+    });
+    await query.manager.delete(CommentRates, rate_id);
+  }
+
   async deleteRate(
     rate_id: number,
     review_id: number,
@@ -117,6 +145,26 @@ export class ReviewsService {
       review_rating: () => `review_rating + ${rating ? 1 : -1}`,
     });
     await query.manager.delete(ReviewRates, rate_id);
+  }
+
+  async addUserCommentRate(
+    comment_id: number,
+    user_id: number,
+    rating: boolean,
+    query: QueryRunner,
+  ): Promise<void> {
+    await query.manager.insert(CommentRates, {
+      comment: {
+        id: comment_id,
+      },
+      user: {
+        id: user_id,
+      },
+      rate: rating,
+    });
+    await query.manager.update(Comments, comment_id, {
+      comment_rating: () => `comment_rating + ${rating ? 1 : -1}`,
+    });
   }
 
   async addUserRate(
@@ -147,6 +195,14 @@ export class ReviewsService {
         user: {
           id: user_id,
         },
+      },
+    });
+  }
+
+  async getCommentById(id: number): Promise<Comments> {
+    return await this.commentsRepository.findOne({
+      where: {
+        id,
       },
     });
   }

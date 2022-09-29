@@ -13,4 +13,5 @@ export const errorCode = {
   admin: 'ADMIN_ERROR',
   deadlock: 'DEADLOCK_ERROR',
   review: 'REVIEW_ERROR',
+  comment: 'COMMENT_ERROR',
 };

@@ -13,6 +13,7 @@ import {
   reviewSuccesses,
   UpdateReview,
   GetComments,
+  RateComment,
 } from './resources';
 import {
   CustomError,
@@ -30,6 +31,52 @@ export class ReviewService {
     private phonesService: PhonesService,
     private connection: Connection,
   ) {}
+
+  async rateComment(
+    data: RateComment,
+    user_id: number,
+  ): Promise<MessageAnswer> {
+    const { comment_id, rating } = data;
+    const comment = await this.reviewsService.getCommentById(comment_id);
+    if (!comment) {
+      throw new CustomError(reviewErrors.commentNotExist, errorCode.comment);
+    }
+    let message = '';
+    const methods = async (query: QueryRunner) => {
+      const rateExist = await this.reviewsService.getUserCommentRate(
+        comment_id,
+        user_id,
+        query,
+      );
+      if (rateExist) {
+        await this.reviewsService.deleteCommentRate(
+          rateExist.id,
+          comment_id,
+          !rateExist.rate,
+          query,
+        );
+        message = reviewSuccesses.updateRate;
+      } else {
+        await this.reviewsService.addUserCommentRate(
+          comment_id,
+          user_id,
+          rating,
+          query,
+        );
+        message = reviewSuccesses.addRate;
+      }
+    };
+    await initQueryRunner({
+      connect: this.connection,
+      methods,
+      lock: TransactionLockType.SERIALIZABLE,
+      disableAttemts: true,
+    });
+
+    return {
+      message,
+    };
+  }
 
   async getComments(
     data: GetReviewComments,

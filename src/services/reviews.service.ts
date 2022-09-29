@@ -27,7 +27,6 @@ export class ReviewsService {
 
   async commentsCount(id: number): Promise<number> {
     return await this.commentsRepository.count({
-      relations: ['phone'],
       where: {
         review: {
           id,
@@ -43,7 +42,7 @@ export class ReviewsService {
     user_id?: number,
   ): Promise<Comment[]> {
     const query = this.commentsRepository
-      .createQueryBuilder('comment')
+      .createQueryBuilder('com')
       .select([
         'id',
         'comment',
@@ -58,7 +57,7 @@ export class ReviewsService {
             .select(['id AS user_id', 'first_name', 'last_name'])
             .from(Users, 'u'),
         'user',
-        'user.user_id = comment.user_id',
+        'user.user_id = com.user_id',
       );
 
     if (user_id) {
@@ -72,7 +71,7 @@ export class ReviewsService {
             ])
             .from(CommentRates, 'r'),
         'rates',
-        `rates.comment_id = comment.id AND rates.user_rate_id = ${user_id}`,
+        `rates.comment_id = com.id AND rates.user_rate_id = ${user_id}`,
       );
     }
     const result = await query

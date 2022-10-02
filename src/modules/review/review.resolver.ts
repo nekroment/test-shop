@@ -14,6 +14,8 @@ import {
   CreateComment,
   GetReviewComments,
   RateComment,
+  ReplyToComment,
+  GetReplyComments,
 } from './resources/dto';
 import { ReviewService } from './review.service';
 
@@ -38,6 +40,15 @@ export class ReviewResolver {
     @Context(TransformContextPipe) { id }: ContextType,
   ): Promise<MessageAnswer> {
     return await this.reviewService.createComment(id, data);
+  }
+
+  @Mutation(() => MessageAnswer)
+  @UseGuards(AuthGuard)
+  async replyToComment(
+    @Args('data') data: ReplyToComment,
+    @Context(TransformContextPipe) { id }: ContextType,
+  ): Promise<MessageAnswer> {
+    return await this.reviewService.replyToComment(id, data);
   }
 
   @Mutation(() => MessageAnswer)
@@ -82,6 +93,14 @@ export class ReviewResolver {
     @Context(TransformContextPipe) { id }: ContextType,
   ): Promise<GetReviews> {
     return await this.reviewService.getReviews(data, id);
+  }
+
+  @Query(() => GetComments)
+  async getReplyComments(
+    @Args('data') data: GetReplyComments,
+    @Context(TransformContextPipe) { id }: ContextType,
+  ): Promise<GetComments> {
+    return await this.reviewService.getReplyComments(data, id);
   }
 
   @Query(() => GetComments)

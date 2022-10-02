@@ -19,9 +19,13 @@ export class Comments {
   @JoinColumn({ name: 'user_id' })
   user: Users;
 
-  @ManyToOne(() => Reviews)
+  @ManyToOne(() => Reviews, { nullable: true })
   @JoinColumn({ name: 'review_id' })
   review: Reviews;
+
+  @ManyToOne(() => Comments, { nullable: true })
+  @JoinColumn({ name: 'comment_id' })
+  answer: Comments;
 
   @Column({ type: 'varchar', length: 128, default: '' })
   comment: string;

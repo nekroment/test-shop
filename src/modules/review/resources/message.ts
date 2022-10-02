@@ -14,4 +14,5 @@ export const reviewSuccesses = {
   addRate: 'You have successfully rated this review.',
   addComment: 'Your comment has been successfully saved!',
   updateRate: 'Your review score has been changed.',
+  reppyToComment: 'Your reply to the comment has been saved.',
 };

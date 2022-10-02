@@ -5,3 +5,5 @@ export * from './rateReview.dto';
 export * from './createComment.dto';
 export * from './getComments.dto';
 export * from './rateComment.dto';
+export * from './replyToComment.dto';
+export * from './getReplyComments.dto';

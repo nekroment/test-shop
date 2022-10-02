@@ -25,8 +25,20 @@ export class ReviewsService {
     private commentsRepository: Repository<Comments>,
   ) {}
 
+  async replycommentsCount(id: number): Promise<number> {
+    return await this.commentsRepository.count({
+      relations: ['answer'],
+      where: {
+        answer: {
+          id,
+        },
+      },
+    });
+  }
+
   async commentsCount(id: number): Promise<number> {
     return await this.commentsRepository.count({
+      relations: ['review'],
       where: {
         review: {
           id,
@@ -35,7 +47,7 @@ export class ReviewsService {
     });
   }
 
-  async getComments(
+  async getReplyComments(
     id: number,
     take: number,
     skip: number,
@@ -75,6 +87,70 @@ export class ReviewsService {
       );
     }
     const result = await query
+      .where('com.comment_id = :id', { id })
+      .offset(skip)
+      .limit(take)
+      .getRawMany();
+    for (const element of result) {
+      element.user = {
+        id: element.user_id,
+        first_name: element.first_name,
+        last_name: element.last_name,
+      };
+    }
+    return result;
+  }
+
+  async getComments(
+    id: number,
+    take: number,
+    skip: number,
+    user_id?: number,
+  ): Promise<Comment[]> {
+    const query = this.commentsRepository
+      .createQueryBuilder('com')
+      .select([
+        'id',
+        'comment',
+        'datetime',
+        'updated',
+        'comment_rating',
+        'review_id',
+      ])
+      .leftJoinAndSelect(
+        (qb: SelectQueryBuilder<any>) =>
+          qb
+            .select(['comment_id', 'COUNT(id) AS answers'])
+            .from(Comments, 'c')
+            .groupBy('comment_id'),
+        'answer',
+        'answer.comment_id = com.id',
+      )
+      .addSelect(['answer.answers'])
+      .leftJoinAndSelect(
+        (qb: SelectQueryBuilder<any>) =>
+          qb
+            .select(['id AS user_id', 'first_name', 'last_name'])
+            .from(Users, 'u'),
+        'user',
+        'user.user_id = com.user_id',
+      );
+
+    if (user_id) {
+      query.leftJoinAndSelect(
+        (qb: SelectQueryBuilder<any>) =>
+          qb
+            .select([
+              'comment_id',
+              'user_id AS user_rate_id',
+              'rate AS user_rating',
+            ])
+            .from(CommentRates, 'r'),
+        'rates',
+        `rates.comment_id = com.id AND rates.user_rate_id = ${user_id}`,
+      );
+    }
+    const result = await query
       .where('review_id = :id', { id })
       .offset(skip)
       .limit(take)
@@ -85,6 +161,7 @@ export class ReviewsService {
         first_name: element.first_name,
         last_name: element.last_name,
       };
+      element.answers = element.answers ? element.answers : 0;
     }
     return result;
   }
@@ -294,6 +371,24 @@ export class ReviewsService {
       };
     }
     return result;
+  }
+
+  async replyComment(
+    user_id: number,
+    comment_id: number,
+    comment: string,
+  ): Promise<void> {
+    await this.commentsRepository.save(
+      this.commentsRepository.create({
+        answer: {
+          id: comment_id,
+        },
+        user: {
+          id: user_id,
+        },
+        comment,
+      }),
+    );
   }
 
   async addComment(

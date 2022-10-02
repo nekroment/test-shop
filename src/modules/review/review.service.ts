@@ -14,6 +14,8 @@ import {
   UpdateReview,
   GetComments,
   RateComment,
+  ReplyToComment,
+  GetReplyComments,
 } from './resources';
 import {
   CustomError,
@@ -31,6 +33,21 @@ export class ReviewService {
     private phonesService: PhonesService,
     private connection: Connection,
   ) {}
+
+  async replyToComment(
+    user_id: number,
+    data: ReplyToComment,
+  ): Promise<MessageAnswer> {
+    const { comment, comment_id } = data;
+    const commentExist = await this.reviewsService.getCommentById(comment_id);
+    if (!commentExist) {
+      throw new CustomError(reviewErrors.commentNotExist, errorCode.comment);
+    }
+    await this.reviewsService.replyComment(user_id, comment_id, comment);
+    return {
+      message: reviewSuccesses.reppyToComment,
+    };
+  }
 
   async rateComment(
     data: RateComment,
@@ -75,6 +92,22 @@ export class ReviewService {
 
     return {
       message,
+    };
+  }
+
+  async getReplyComments(
+    data: GetReplyComments,
+    user_id?: number,
+  ): Promise<GetComments> {
+    const { comment_id, take, skip } = data;
+    const [comments, total] = await Promise.all([
+      this.reviewsService.getReplyComments(comment_id, take, skip, user_id),
+      this.reviewsService.replycommentsCount(comment_id),
+    ]);
+
+    return {
+      comments,
+      total,
     };
   }
 

@@ -24,4 +24,7 @@ export class Comment {
 
   @Field({ nullable: true })
   updated: string;
+
+  @Field(() => Int, { nullable: true })
+  answers: number;
 }

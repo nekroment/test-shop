@@ -172,9 +172,11 @@ export class ReviewsService {
     query: QueryRunner,
   ): Promise<CommentRates> {
     return await query.manager.findOne(CommentRates, {
-      relations: ['user'],
+      relations: ['user', 'comment'],
       where: {
-        id: comment_id,
+        comment: {
+          id: comment_id,
+        },
         user: {
           id: user_id,
         },

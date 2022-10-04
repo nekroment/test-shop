@@ -16,6 +16,7 @@ import {
   RateComment,
   ReplyToComment,
   GetReplyComments,
+  UpdateComment,
 } from './resources';
 import {
   CustomError,
@@ -198,6 +199,36 @@ export class ReviewService {
 
     return {
       message: reviewSuccesses.updateReview,
+    };
+  }
+
+  async updateComment(
+    user_id: number,
+    data: UpdateComment,
+  ): Promise<MessageAnswer> {
+    const { comment_id } = data;
+    const comment = await this.reviewsService.getUserComment(
+      comment_id,
+      user_id,
+    );
+    if (!comment) {
+      throw new CustomError(reviewErrors.commentNotExist, errorCode.comment);
+    }
+    await this.reviewsService.updateComment(data);
+
+    return {
+      message: reviewSuccesses.updateReview,
+    };
+  }
+
+  async deleteComment(user_id: number, id: number): Promise<MessageAnswer> {
+    const comment = await this.reviewsService.getUserComment(id, user_id);
+    if (!comment) {
+      throw new CustomError(reviewErrors.commentNotExist, errorCode.comment);
+    }
+    await this.reviewsService.deleteComment(id);
+    return {
+      message: reviewSuccesses.deleteComment,
     };
   }
 

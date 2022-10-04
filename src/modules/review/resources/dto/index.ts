@@ -7,3 +7,4 @@ export * from './getComments.dto';
 export * from './rateComment.dto';
 export * from './replyToComment.dto';
 export * from './getReplyComments.dto';
+export * from './updateComment.dto';

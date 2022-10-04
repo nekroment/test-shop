@@ -16,6 +16,7 @@ import {
   RateComment,
   ReplyToComment,
   GetReplyComments,
+  UpdateComment,
 } from './resources/dto';
 import { ReviewService } from './review.service';
 
@@ -62,11 +63,29 @@ export class ReviewResolver {
 
   @Mutation(() => MessageAnswer)
   @UseGuards(AuthGuard)
+  async updateComment(
+    @Args('data') data: UpdateComment,
+    @Context(TransformContextPipe) { id }: ContextType,
+  ): Promise<MessageAnswer> {
+    return await this.reviewService.updateComment(id, data);
+  }
+
+  @Mutation(() => MessageAnswer)
+  @UseGuards(AuthGuard)
   async deleteReview(
     @Args('id', { type: () => Int }) review_id: number,
     @Context(TransformContextPipe) { id }: ContextType,
   ): Promise<MessageAnswer> {
     return await this.reviewService.deleteReview(id, review_id);
+  }
+
+  @Mutation(() => MessageAnswer)
+  @UseGuards(AuthGuard)
+  async deleteComment(
+    @Args('id', { type: () => Int }) comment_id: number,
+    @Context(TransformContextPipe) { id }: ContextType,
+  ): Promise<MessageAnswer> {
+    return await this.reviewService.deleteComment(id, comment_id);
   }
 
   @Mutation(() => MessageAnswer)

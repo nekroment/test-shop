@@ -19,7 +19,7 @@ export class ReviewRates {
   @JoinColumn({ name: 'user_id' })
   user: Users;
 
-  @ManyToOne(() => Reviews)
+  @ManyToOne(() => Reviews, { onDelete: 'CASCADE' })
   @JoinColumn({ name: 'review_id' })
   review: Reviews;
 

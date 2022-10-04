@@ -9,7 +9,11 @@ import {
   Reviews,
   Users,
 } from 'src/entities';
-import { CreateReview, UpdateReview } from 'src/modules/review/resources';
+import {
+  CreateReview,
+  UpdateComment,
+  UpdateReview,
+} from 'src/modules/review/resources';
 import { Comment, getFormatDate, Review } from 'src/resources';
 
 @Injectable()
@@ -286,6 +290,18 @@ export class ReviewsService {
     });
   }
 
+  async getUserComment(id: number, user_id: number): Promise<Comments> {
+    return await this.commentsRepository.findOne({
+      relations: ['user'],
+      where: {
+        id,
+        user: {
+          id: user_id,
+        },
+      },
+    });
+  }
+
   async getReviewById(id: number): Promise<Reviews> {
     return await this.reviewsRepository.findOne({
       relations: ['user'],
@@ -305,8 +321,21 @@ export class ReviewsService {
     });
   }
 
+  async updateComment(data: UpdateComment): Promise<void> {
+    const { comment_id, comment } = data;
+    const updated = getFormatDate();
+    await this.commentsRepository.update(comment_id, {
+      comment,
+      updated,
+    });
+  }
+
   async deleteReview(id: number): Promise<void> {
     await this.reviewsRepository.delete(id);
+  }
+
+  async deleteComment(id: number): Promise<void> {
+    await this.commentsRepository.delete(id);
   }
 
   async reviewsCount(id: number): Promise<number> {

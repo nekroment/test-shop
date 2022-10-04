@@ -19,7 +19,7 @@ export class CommentRates {
   @JoinColumn({ name: 'user_id' })
   user: Users;
 
-  @ManyToOne(() => Comments)
+  @ManyToOne(() => Comments, { onDelete: 'CASCADE' })
   @JoinColumn({ name: 'comment_id' })
   comment: Comments;
 

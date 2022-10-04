@@ -19,11 +19,11 @@ export class Comments {
   @JoinColumn({ name: 'user_id' })
   user: Users;
 
-  @ManyToOne(() => Reviews, { nullable: true })
+  @ManyToOne(() => Reviews, { nullable: true, onDelete: 'CASCADE' })
   @JoinColumn({ name: 'review_id' })
   review: Reviews;
 
-  @ManyToOne(() => Comments, { nullable: true })
+  @ManyToOne(() => Comments, { nullable: true, onDelete: 'CASCADE' })
   @JoinColumn({ name: 'comment_id' })
   answer: Comments;
 
